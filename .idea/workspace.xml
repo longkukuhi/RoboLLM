@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0300509d-02a5-44c3-87d1-4c595dec02cd" name="Changes" comment="armbench initial version">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="0300509d-02a5-44c3-87d1-4c595dec02cd" name="Changes" comment="armbench initial version" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,22 +29,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Codes/beit3_long&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;debugger.dataViews.python.type.renderers&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "E:/Codes/armbench",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "debugger.dataViews.python.type.renderers",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Codes\beit3_long\beit3_scripts" />
@@ -55,7 +53,7 @@
       <recent name="E:\Codes\beit3_long\exploring_notebooks" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.armbench_training">
+  <component name="RunManager" selected="Python.armbench_training_pick1">
     <configuration name="armbench_eval" type="PythonConfigurationType" factoryName="Python" singleton="false">
       <module name="beit3_long" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -79,7 +77,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="armbench_training" type="PythonConfigurationType" factoryName="Python" singleton="false">
+    <configuration name="armbench_training_3_to_1" type="PythonConfigurationType" factoryName="Python" singleton="false">
       <module name="beit3_long" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -88,13 +86,36 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
-      <option name="WORKING_DIRECTORY" value="E:\Codes\beit3_long" />
+      <option name="WORKING_DIRECTORY" value="E:\Codes\armbench" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/armbench/ID.py" />
       <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task armbench3t1 --layer_decay 0.65 --lr 2e-4 --epochs 15 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/armbench/armbench-object-id/ --output_dir ./armbench_output/ --log_dir ./armbench_log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 8 --num_max_bpe_tokens 256 --batch_size 16 --eval_batch_size 32 --enable_wandb" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="armbench_training_pick1" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="E:\Codes\armbench" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/armbench/ID.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task armbenchpick1 --layer_decay 0.65 --lr 7e-4 --epochs 50 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_patch16_224.pth --data_path ../datasets/armbench/armbench-object-id/ --output_dir ./armbench_output/ --log_dir ./armbench_log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 8 --num_max_bpe_tokens 256 --batch_size 16 --eval_batch_size 32 --enable_wandb" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -285,7 +306,8 @@
     </configuration>
     <list>
       <item itemvalue="Python.armbench_eval" />
-      <item itemvalue="Python.armbench_training" />
+      <item itemvalue="Python.armbench_training_3_to_1" />
+      <item itemvalue="Python.armbench_training_pick1" />
       <item itemvalue="Python.eval" />
       <item itemvalue="Python.text_to_image_finetune" />
       <item itemvalue="Python.text_to_image_pretrain" />
@@ -329,6 +351,7 @@
       <workItem from="1691053865555" duration="30326000" />
       <workItem from="1691227705070" duration="53225000" />
       <workItem from="1691400612481" duration="26978000" />
+      <workItem from="1691512463346" duration="7467000" />
     </task>
     <task id="LOCAL-00001" summary="add R@1000">
       <option name="closed" value="true" />
@@ -406,6 +429,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/armbench/engine.py</url>
+          <line>629</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -417,6 +447,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/beit3_long$text_to_image_finetune.coverage" NAME="text_to_image_finetune Coverage Results" MODIFIED="1691359718508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/armbench$armbench_training.coverage" NAME="armbench_training Coverage Results" MODIFIED="1691520211865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:\Codes\armbench" />
     <SUITE FILE_PATH="coverage/beit3_long$retrieval.coverage" NAME="retrieval Coverage Results" MODIFIED="1689703506903" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/beit3_long$image_to_text.coverage" NAME="image_to_text Coverage Results" MODIFIED="1690914380481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/beit3_long$eval.coverage" NAME="eval Coverage Results" MODIFIED="1691099049127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -428,6 +459,7 @@
     <SUITE FILE_PATH="coverage/beit3_long$split_images_and_save_into_npy_file.coverage" NAME="split_images_and_save_into_npy_file Coverage Results" MODIFIED="1690989532807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/process_dataset" />
     <SUITE FILE_PATH="coverage/beit3_long$text_to_image_pretrain.coverage" NAME="text_to_image_pretrain Coverage Results" MODIFIED="1691102509393" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/beit3_long$armbench_eval.coverage" NAME="armbench_eval Coverage Results" MODIFIED="1691278360180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:\Codes\beit3_long" />
+    <SUITE FILE_PATH="coverage/armbench$armbench_training_pick1.coverage" NAME="armbench_training_pick1 Coverage Results" MODIFIED="1691521883490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:\Codes\armbench" />
     <SUITE FILE_PATH="coverage/beit3_long$image_to_text_finetune.coverage" NAME="image_to_text_finetune Coverage Results" MODIFIED="1691399798873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/beit3_long$view_submission.coverage" NAME="view_submission Coverage Results" MODIFIED="1690917507332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

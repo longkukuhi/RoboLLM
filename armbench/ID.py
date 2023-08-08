@@ -279,6 +279,8 @@ def main(args, ds_init):
     if not args.model.endswith(args.task):
         if args.task in ("armbench3t1"):
             model_config = "%s_armbench3t1" % args.model
+        elif args.task in ("armbenchpick1"):
+            model_config = "%s_armbenchpick1" % args.model
         else:
             raise Exception("Unknown task %s" % args.task)
     else:

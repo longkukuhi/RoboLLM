@@ -109,7 +109,7 @@ class ArmbenchDataset(Beit3baseDataset):
         self.data_path = data_path
 
         self.args = args
-        if args.task == 'armbench3t1':
+        if args.task == 'armbench3t1' or args.task == 'armbenchpick1':
             with open(os.path.join(data_path,  f'{split}_data_3t1.json'), 'r') as f:
                 self.items = json.load(f)
             # self.items = ImageFolder(os.path.join(data_path, 'Picks', split+'_data_3t1'))
@@ -160,6 +160,10 @@ class ArmbenchDataset(Beit3baseDataset):
             image_paths = self.items[pickid]['pickimg_3t1_paths']
             images = [self.transform(Image.open(os.path.join(self.data_path, 'Picks', pickid, image_path)).convert('RGB')) for image_path in image_paths]
             return images
+        elif self.args.task == 'armbenchpick1':
+            image = self.transform(
+                Image.open(os.path.join(self.data_path, 'Picks', pickid, 'PickRGB.jpg')).convert('RGB'))
+            return image
         else:
             raise NotImplementedError
 
@@ -178,10 +182,15 @@ class ArmbenchDataset(Beit3baseDataset):
 
     def _get_image_text_example(self, index: int, data: dict):
         pick_id = self.pick_ids[index]
-        pick_imgs = self._get_pick_image(pick_id)
-        data["image0"] = pick_imgs[0] #OnArmLowRGB
-        data["image1"] = pick_imgs[1] #PickRGB.jpg
-        data["image2"] = pick_imgs[2] #ToteWallRGB.jpg
+        if self.args.task == 'armbench3t1':
+            pick_imgs = self._get_pick_image(pick_id)
+            data["image0"] = pick_imgs[0] #OnArmLowRGB
+            data["image1"] = pick_imgs[1] #PickRGB.jpg
+            data["image2"] = pick_imgs[2] #ToteWallRGB.jpg
+        elif self.args.task == 'armbenchpick1':
+            pick_img = self._get_pick_image(pick_id)
+            data["pick_image"] = pick_img
+
         # data["pick_images"] = pick_imgs
         data['pick_id'] = index #pick_id
         # item_id = self._get_pick_class_id(index)
@@ -196,7 +205,6 @@ class ArmbenchDataset(Beit3baseDataset):
         return data
 
     def __len__(self) -> int:
-        # return 1000
         return len(self.items)
 
 
@@ -213,7 +221,7 @@ class ArmbenchPickDataset(Beit3baseDataset):
         self.data_path = data_path
 
         self.args = args
-        if args.task == 'armbench3t1':
+        if args.task == 'armbench3t1' or args.task == 'armbenchpick1':
             with open(os.path.join(data_path,  f'{split}_data_3t1.json'), 'r') as f:
                 self.pick_items = json.load(f)
 
@@ -263,17 +271,28 @@ class ArmbenchPickDataset(Beit3baseDataset):
             image_paths = self.pick_items[pickid]['pickimg_3t1_paths']
             images = [self.transform(Image.open(os.path.join(self.data_path, 'Picks', pickid, image_path)).convert('RGB')) for image_path in image_paths]
             return images
+        elif self.args.task == 'armbenchpick1':
+            image = self.transform(Image.open(os.path.join(self.data_path, 'Picks', pickid, 'PickRGB.jpg')).convert('RGB'))
+            return image
         else:
             raise NotImplementedError
 
     def _get_image_text_example(self, index: int, data: dict):
-        pick_id = self.pick_ids[index]
-        imgs = self._get_image(pick_id)
-        # data["images"] = imgs
-        data["image0"] = imgs[0] #OnArmLowRGB
-        data["image1"] = imgs[1] #PickRGB.jpg
-        data["image2"] = imgs[2] #ToteWallRGB.jpg
-        data["pick_id"] = index
+        if self.args.task == 'armbench3t1':
+            pick_id = self.pick_ids[index]
+            imgs = self._get_image(pick_id)
+            # data["images"] = imgs
+            data["image0"] = imgs[0] #OnArmLowRGB
+            data["image1"] = imgs[1] #PickRGB.jpg
+            data["image2"] = imgs[2] #ToteWallRGB.jpg
+            data["pick_id"] = index
+        elif self.args.task == 'armbenchpick1':
+            pick_id = self.pick_ids[index]
+            img = self._get_image(pick_id)
+            data["pick_image"] = img
+            data["pick_id"] = index
+        else:
+            raise NotImplementedError
 
         # text_segment = item["text_segment"]
         # language_tokens, padding_mask, _ = self._get_text_segment(text_segment)
@@ -288,7 +307,6 @@ class ArmbenchPickDataset(Beit3baseDataset):
         return data
 
     def __len__(self):
-        # return 1000
         return len(self.pick_items)
 
 
@@ -331,7 +349,7 @@ class ArmbenchRefDataset(Beit3baseDataset):
 
     def _get_image_text_example(self, index: int, data: dict):
         img = self._get_image(index)
-        data["image"] = img
+        data["ref_image"] = img
         data["ref_id"] = index #self.index_to_refid[index]
 
         # text_segment = item["text_segment"]
@@ -347,7 +365,6 @@ class ArmbenchRefDataset(Beit3baseDataset):
         return data
 
     def __len__(self):
-        # return 1000
         return len(self.all_img_paths)
 
 
@@ -365,7 +382,6 @@ def create_armbench_dataset(args, split):
     else:
         batch_size = int(args.batch_size * 1.5)
 
-
     dataset = ArmbenchDataset(
         data_path=args.data_path,
         split=split,
@@ -374,6 +390,7 @@ def create_armbench_dataset(args, split):
         num_max_bpe_tokens=args.num_max_bpe_tokens,
         args=args,
     )
+
 
     dataloader = create_dataloader(
         dataset, is_train=is_train, batch_size=batch_size,

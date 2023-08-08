@@ -140,11 +140,66 @@ class BEiTForArmBenchRetrieval(BEiT3Wrapper):
 
         # self.language_head.apply(self._init_weights)
 
+        self.fc_norm = norm_layer(embed_dim)
+        self.fc_norm.apply(self._init_weights)
+
         self.criterion = utils.ClipLoss(
             rank=utils.get_rank(),
             world_size=utils.get_world_size(),
         )
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
+
+    def forward(self, query_images=None, ref_image=None, text_description=None, padding_mask=None, only_infer=False, **kwargs):
+        if query_images is not None:
+            image0 = query_images
+
+            outputs = self.beit3(
+                textual_tokens=None,
+                visual_tokens=image0,
+                text_padding_position=None,
+            )
+            x = outputs["encoder_out"]
+            t = x[:, 1:, :]
+            cls_x = self.fc_norm(t.mean(1))
+            query_vision_cls = cls_x
+        else:
+            query_vision_cls = None
+
+        if ref_image is not None:
+            outputs = self.beit3(
+                textual_tokens=None,
+                visual_tokens=ref_image,
+                text_padding_position=None,
+            )
+            x = outputs["encoder_out"]
+            t = x[:, 1:, :]
+            cls_x = self.fc_norm(t.mean(1))
+            ref_vision_cls = cls_x
+        else:
+            ref_vision_cls = None
+
+
+        if text_description is not None:
+            outputs = self.beit3(
+                textual_tokens=text_description,
+                visual_tokens=None,
+                text_padding_position=padding_mask,
+            )
+            x = outputs["encoder_out"]
+            language_cls = self.language_head(x[:, 0, :])
+            language_cls = F.normalize(language_cls, dim=-1)
+        else:
+            language_cls = None
+
+        if only_infer:
+            return query_vision_cls, ref_vision_cls
+        else:
+            loss, logits_per_query, logits_per_ref = self.criterion(
+                query_vision_cls, ref_vision_cls, self.logit_scale.exp())
+
+            return loss, query_vision_cls, language_cls
+
+
 
 @register_model
 def beit3_base_patch16_224_armbench3t1(pretrained=False, **kwargs):
@@ -153,3 +208,8 @@ def beit3_base_patch16_224_armbench3t1(pretrained=False, **kwargs):
     return model
 
 
+@register_model
+def beit3_base_patch16_224_armbenchpick1(pretrained=False, **kwargs):
+    args = _get_base_config(**kwargs)
+    model = BEiTForArmBenchRetrieval(args, **kwargs)
+    return model
