@@ -1,0 +1,9 @@
+/log/
+/armbench_log/
+/armbench_output/
+/atomic_output/
+/output/
+/log/
+/venv/
+/embeddings/
+/wandb/

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0300509d-02a5-44c3-87d1-4c595dec02cd" name="Changes" comment="armbench initial version">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="Jupyter Notebook" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2SkuTmoy1XH76qHjSviOOUIJLx7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Codes/beit3_long&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;debugger.dataViews.python.type.renderers&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Codes\beit3_long\beit3_scripts" />
+      <recent name="E:\Codes\beit3_long\atomic" />
+      <recent name="E:\Codes\beit3_long\beit3_tools" />
+      <recent name="E:\Codes\beit3_long\exploring_notebooks" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.armbench_training">
+    <configuration name="armbench_eval" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="E:\Codes\beit3_long" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/armbench/ID.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task armbench3t1 --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/armbench-object-id/ --output_dir ./armbench_output/ --log_dir ./armbench_log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 8 --num_max_bpe_tokens 256 --eval --batch_size 128 --eval_batch_size 128" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="armbench_training" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="E:\Codes\beit3_long" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/armbench/ID.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task armbench3t1 --layer_decay 0.65 --lr 2e-4 --epochs 15 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/armbench/armbench-object-id/ --output_dir ./armbench_output/ --log_dir ./armbench_log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 8 --num_max_bpe_tokens 256 --batch_size 16 --eval_batch_size 32 --enable_wandb" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="engine_for_finetuning" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/beit3_tools" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/beit3_tools/engine_for_finetuning.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="eval" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="E:\Codes\beit3_long\venv\Scripts\python.exe" />
+      <option name="SDK_NAME" value="beit3_long" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atomic/retrieval.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task atomic --batch_size 128 --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/ATOMIC/ --output_dir ./output/base_128_itc/ --log_dir ./log/base_256_itc/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 0 --num_max_bpe_tokens 256 --eval --eval_batch_size 1024 --build_ranking --load_image_from_huggingface_hub" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="image_to_text_finetune" type="PythonConfigurationType" factoryName="Python">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atomic/atomic_submission_test.py" />
+      <option name="PARAMETERS" value="--model beit3_large_patch16_224 --input_size 224 --task atomic_submission --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt\beit3\large_5_epochs_256_itc/checkpoint-1.pth --data_path ../datasets/ATOMIC/ --output_dir ./output --log_dir ./log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_worker 8 --num_max_bpe_tokens 256 --batch_size 64 --eval_batch_size 32 --query_url TREC-AToMiC/TREC-2023-Image-to-Text --eval_on_test_set --retrieval_mode image_to_text --run_id finetune_large_i2t" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="image_to_text_pretrain" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="E:\Codes\beit3_long\atomic\atomic_submission_test.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task atomic_submission --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/ATOMIC/ --output_dir ./output --log_dir ./log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 16 --num_max_bpe_tokens 256 --batch_size 64 --eval_batch_size 32 --query_url TREC-AToMiC/TREC-2023-Image-to-Text --eval_on_test_set --retrieval_mode image_to_text --run_id pretrain_base --embeddings_file_path embeddings\text\pretrain_base --load_embeddings_from_npy" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="split_images_and_save_into_npy_file" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/process_dataset" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/process_dataset/split_images_and_save_into_npy_file.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="text_to_image_finetune" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="E:\Codes\beit3_long\venv\Scripts\python.exe" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atomic/atomic_submission_test.py" />
+      <option name="PARAMETERS" value="--model beit3_large_patch16_224 --input_size 224 --task atomic_submission --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt\beit3\large_5_epochs_256_itc/checkpoint-1.pth --data_path ../datasets/ATOMIC/ --output_dir ./output --log_dir ./log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_worker 16 --num_max_bpe_tokens 256 --batch_size 64 --eval_batch_size 32 --query_url TREC-AToMiC/TREC-2023-Text-to-Image --eval_on_test_set --retrieval_mode text_to_image --run_id finetune_large_t2i --load_image_from_huggingface_hub" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="text_to_image_pretrain" type="PythonConfigurationType" factoryName="Python">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.10 (beit3_long)" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atomic/atomic_submission_test.py" />
+      <option name="PARAMETERS" value="--model beit3_base_patch16_224 --input_size 224 --task atomic_submission --layer_decay 0.65 --lr 2e-4 --epochs 5 --warmup_epochs 2 --drop_path 0.2 --sentencepiece_model beit3.spm --finetune ../ckpt/beit3/beit3_base_itc_patch16_224.pth --data_path ../datasets/ATOMIC/ --output_dir ./output --log_dir ./log/ --weight_decay 0.05 --seed 42 --save_ckpt_freq 1 --num_workers 16 --num_max_bpe_tokens 256 --batch_size 64 --eval_batch_size 32 --query_url TREC-AToMiC/TREC-2023-Text-to-Image --eval_on_test_set --retrieval_mode text_to_image --run_id pretrain_base --embeddings_file_path embeddings\image\beit3_base_patch16_224_beit3_base_itc_patch16_224.pth --load_embeddings_from_npy" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="view_submission" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="beit3_long" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="E:\Codes\beit3_long\exploring_notebooks\view_submission.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.armbench_eval" />
+      <item itemvalue="Python.armbench_training" />
+      <item itemvalue="Python.eval" />
+      <item itemvalue="Python.text_to_image_finetune" />
+      <item itemvalue="Python.text_to_image_pretrain" />
+      <item itemvalue="Python.image_to_text_finetune" />
+      <item itemvalue="Python.image_to_text_pretrain" />
+      <item itemvalue="Python.engine_for_finetuning" />
+      <item itemvalue="Python.split_images_and_save_into_npy_file" />
+      <item itemvalue="Python.view_submission" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.engine_for_finetuning" />
+        <item itemvalue="Python.split_images_and_save_into_npy_file" />
+        <item itemvalue="Python.view_submission" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0300509d-02a5-44c3-87d1-4c595dec02cd" name="Changes" comment="" />
+      <created>1689702910292</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1689702910292</updated>
+      <workItem from="1689702913917" duration="32214000" />
+      <workItem from="1689873130585" duration="759000" />
+      <workItem from="1689876031359" duration="4956000" />
+      <workItem from="1690486558182" duration="1867000" />
+      <workItem from="1690544571738" duration="7438000" />
+      <workItem from="1690825350248" duration="2412000" />
+      <workItem from="1690828508534" duration="3739000" />
+      <workItem from="1690832352272" duration="1398000" />
+      <workItem from="1690833788958" duration="140000" />
+      <workItem from="1690834116607" duration="134000" />
+      <workItem from="1690834259969" duration="2594000" />
+      <workItem from="1690894848454" duration="3782000" />
+      <workItem from="1690898691805" duration="29666000" />
+      <workItem from="1690989373843" duration="26000" />
+      <workItem from="1690989458846" duration="16503000" />
+      <workItem from="1691053865555" duration="30326000" />
+      <workItem from="1691227705070" duration="53225000" />
+      <workItem from="1691400612481" duration="26978000" />
+    </task>
+    <task id="LOCAL-00001" summary="add R@1000">
+      <option name="closed" value="true" />
+      <created>1689709822265</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1689709822265</updated>
+    </task>
+    <task id="LOCAL-00002" summary="finish coding store the ranking result">
+      <option name="closed" value="true" />
+      <created>1689720265263</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1689720265263</updated>
+    </task>
+    <task id="LOCAL-00003" summary="RANKING seems chaos">
+      <option name="closed" value="true" />
+      <created>1690907419344</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1690907419344</updated>
+    </task>
+    <task id="LOCAL-00004" summary="texttoiamge is good">
+      <option name="closed" value="true" />
+      <created>1691083933380</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1691083933380</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fixed image to text test set issue">
+      <option name="closed" value="true" />
+      <created>1691101383896</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1691101383896</updated>
+    </task>
+    <task id="LOCAL-00006" summary="armbench initial version">
+      <option name="closed" value="true" />
+      <created>1691511798737</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1691511798737</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add R@1000" />
+    <MESSAGE value="finish coding store the ranking result" />
+    <MESSAGE value="RANKING seems chaos" />
+    <MESSAGE value="texttoiamge is good" />
+    <MESSAGE value="fixed image to text test set issue" />
+    <MESSAGE value="armbench initial version" />
+    <option name="LAST_COMMIT_MESSAGE" value="armbench initial version" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/beit3_long$text_to_image_finetune.coverage" NAME="text_to_image_finetune Coverage Results" MODIFIED="1691359718508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/beit3_long$retrieval.coverage" NAME="retrieval Coverage Results" MODIFIED="1689703506903" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/beit3_long$image_to_text.coverage" NAME="image_to_text Coverage Results" MODIFIED="1690914380481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/beit3_long$eval.coverage" NAME="eval Coverage Results" MODIFIED="1691099049127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/beit3_long$image_to_text_pretrain.coverage" NAME="image_to_text_pretrain Coverage Results" MODIFIED="1691101719430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/beit3_long$text_to_image.coverage" NAME="text_to_image_finetune Coverage Results" MODIFIED="1691103899802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/beit3_long$armbench_training.coverage" NAME="armbench_training Coverage Results" MODIFIED="1691450973112" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:\Codes\beit3_long" />
+    <SUITE FILE_PATH="coverage/beit3_long$submission.coverage" NAME="text_to_image Coverage Results" MODIFIED="1690920172482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/beit3_long$engine_for_finetuning.coverage" NAME="engine_for_finetuning Coverage Results" MODIFIED="1691240388423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/beit3_tools" />
+    <SUITE FILE_PATH="coverage/beit3_long$split_images_and_save_into_npy_file.coverage" NAME="split_images_and_save_into_npy_file Coverage Results" MODIFIED="1690989532807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/process_dataset" />
+    <SUITE FILE_PATH="coverage/beit3_long$text_to_image_pretrain.coverage" NAME="text_to_image_pretrain Coverage Results" MODIFIED="1691102509393" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/beit3_long$armbench_eval.coverage" NAME="armbench_eval Coverage Results" MODIFIED="1691278360180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:\Codes\beit3_long" />
+    <SUITE FILE_PATH="coverage/beit3_long$image_to_text_finetune.coverage" NAME="image_to_text_finetune Coverage Results" MODIFIED="1691399798873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/beit3_long$view_submission.coverage" NAME="view_submission Coverage Results" MODIFIED="1690917507332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
