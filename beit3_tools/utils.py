@@ -634,8 +634,11 @@ def create_ds_config(args):
 def merge_batch_tensors_by_dict_key(batch):
     batch_tensors = {}
     for tensor_key in batch[0]:
+        # print(tensor_key)
         if isinstance(batch[0][tensor_key], torch.Tensor):
             batch_tensors[tensor_key] = torch.stack([d[tensor_key] for d in batch])
+        elif isinstance(batch[0][tensor_key], list):
+            batch_tensors[tensor_key] = [d[tensor_key] for d in batch]
         else:
             batch_tensors[tensor_key] = torch.tensor([d[tensor_key] for d in batch], dtype=torch.long)
     return batch_tensors
@@ -730,6 +733,51 @@ class ClipLoss(nn.Module):
                              F.cross_entropy(logits_per_text, labels)
                      ) / 2
         return total_loss, logits_per_image, logits_per_text
+
+
+class ClipLossOneWay(nn.Module):
+    def __init__(
+            self,
+            cache_labels=False,
+            rank=0,
+            world_size=1,
+    ):
+        super().__init__()
+        self.cache_labels = cache_labels
+        self.rank = rank
+        self.world_size = world_size
+
+        # cache state
+        self.prev_num_logits = 0
+        self.labels = {}
+
+    def forward(self, image_features, ref_features, logit_scale):
+        device = image_features.device
+        if self.world_size > 1:
+            all_image_features, all_ref_features = gather_features(
+                image_features, ref_features
+            )
+
+            logits_per_image = logit_scale * image_features @ all_ref_features.T
+        else:
+            logits_per_image = logit_scale * image_features @ ref_features.T
+
+
+        # calculated ground-truth and cache if enabled
+        num_logits = logits_per_image.shape[0]
+        if self.prev_num_logits != num_logits or device not in self.labels:
+            labels = torch.arange(num_logits, device=device, dtype=torch.long)
+            if self.world_size > 1:
+                labels = labels + num_logits * self.rank
+            if self.cache_labels:
+                self.labels[device] = labels
+                self.prev_num_logits = num_logits
+        else:
+            labels = self.labels[device]
+
+        total_loss = F.cross_entropy(logits_per_image, labels)
+
+        return total_loss, logits_per_image
 
 
 def write_result_to_jsonl(test_stats, result_file):

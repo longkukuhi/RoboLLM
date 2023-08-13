@@ -11,8 +11,8 @@ import torch.nn as nn
 from timm.models.layers import trunc_normal_ as __call_trunc_normal_
 
 from torchscale.model.BEiT3 import BEiT3
-from torchscale.architecture.config import EncoderConfig
-
+# from torchscale.architecture.config import EncoderConfig
+from armbench.config import EncoderConfig
 
 def trunc_normal_(tensor, mean=0., std=1.):
     __call_trunc_normal_(tensor, mean=mean, std=std, a=-std, b=std)
@@ -27,7 +27,7 @@ def _get_base_config(
         layernorm_embedding=False, normalize_output=True, no_output_layer=True, 
         drop_path_rate=drop_path_rate, encoder_embed_dim=768, encoder_attention_heads=12, 
         encoder_ffn_embed_dim=int(768 * mlp_ratio), encoder_layers=12, 
-        checkpoint_activations=checkpoint_activations, 
+        checkpoint_activations=checkpoint_activations, temp=kwargs['temp'], cl_loss=kwargs['cl_loss'],
     )
 
 

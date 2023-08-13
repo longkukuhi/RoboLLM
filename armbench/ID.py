@@ -37,7 +37,8 @@ def get_args():
     parser.add_argument('--model', default='beit_base_patch16_224', type=str, metavar='MODEL',
                         help='Name of model to train')
     parser.add_argument('--task', type=str, required=True,
-                        choices=['armbench3t1','armbenchpick1'],
+                        choices=['armbench3t1','armbenchpick1', 'armbenchpick1to1',
+                                 'armbenchpick1_clloss', 'armbenchpick1_nearestref'],
                         help='Name of task to fine-tuning')
 
     parser.add_argument('--input_size', default=224, type=int,
@@ -209,7 +210,16 @@ def get_args():
     parser.add_argument('--build_ranking', action='store_true', default=False, )
     parser.add_argument('--eval_on_test_set', action='store_true', default=False, )
     parser.add_argument('--cluster', action='store_true', default=False, )
+ 
+    # contrastive learning parameters
+    parser.add_argument('--temp', type=float, default=0.07,
+                        help='temperature for loss function')
+    parser.add_argument('--cl_loss', type=str, default='SimCLR',
+                        choices=['SupCon', 'SimCLR'], help='choose method')
 
+    #eval_freq
+    parser.add_argument('--eval_freq', type=int, default=5,
+                        help='evaluation frequency')
 
     known_args, _ = parser.parse_known_args()
 
@@ -267,9 +277,9 @@ def main(args, ds_init):
 
     #  set output dir
     if args.eval:
-        exp_tag = f"eval_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}/"
+        exp_tag = f"eval_{args.task}tokens_{args.finetune.split('/')[-1]}/"
     else:
-        exp_tag = f"{args.model}_{args.epochs}epochs_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}/"
+        exp_tag = f"{args.model}_{args.epochs}epochs_{args.task}_tasks_{args.finetune.split('/')[-1]}/"
 
     args.output_dir = os.path.join(args.output_dir, exp_tag)
 
@@ -277,10 +287,9 @@ def main(args, ds_init):
         os.makedirs(args.output_dir, exist_ok=True)
 
     if not args.model.endswith(args.task):
-        if args.task in ("armbench3t1"):
-            model_config = "%s_armbench3t1" % args.model
-        elif args.task in ("armbenchpick1"):
-            model_config = "%s_armbenchpick1" % args.model
+        if args.task in ["armbench3t1", "armbenchpick1", "armbenchpick1to1", "armbenchpick1_clloss",
+                         'armbenchpick1_nearestref']:
+            model_config = "%s_%s" % (args.model, args.task)
         else:
             raise Exception("Unknown task %s" % args.task)
     else:
@@ -309,12 +318,17 @@ def main(args, ds_init):
         drop_path_rate=args.drop_path,
         vocab_size=args.vocab_size,
         checkpoint_activations=args.checkpoint_activations,
+        temp = args.temp,
+        cl_loss = args.cl_loss,
     )
 
     if args.finetune:
         utils.load_model_and_may_interpolate(args.finetune, model, args.model_key, args.model_prefix)
 
     model.to(device)
+    if args.task in ['armbenchpick1_nearestref']:
+        model._copy_weights()
+
 
     model_ema = None
     if args.model_ema:
@@ -404,56 +418,56 @@ def main(args, ds_init):
     ref_dataloader = creat_ref_dataset(args, 'test')
 
     if args.eval:
-        if args.task in ["armbench3t1"]:
-            if args.build_ranking:
-                raise NotImplementedError
-                # ext_test_stats, task_key, text_to_image_rank, image_to_text_rank \
-                # = evaluate(data_loader_test, model, device, task_handler, build_ranking=True)
-            else:
-                ext_test_stats, task_key, \
-                    = evaluate(query_dataloader=query_dataloader, answer_dataloader=ref_dataloader, model=model,
-                               device=device, handler=task_handler, args=args,)
+    # if args.task in ["armbench3t1", ]:
+        if args.build_ranking:
+            raise NotImplementedError
+            # ext_test_stats, task_key, text_to_image_rank, image_to_text_rank \
+            # = evaluate(data_loader_test, model, device, task_handler, build_ranking=True)
+        else:
+            ext_test_stats, task_key, \
+                = evaluate(query_dataloader=query_dataloader, answer_dataloader=ref_dataloader, model=model,
+                           device=device, handler=task_handler, args=args,)
 
-            json_file = f"{args.output_dir}/{args.task}_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}_test_results.json"
+        json_file = f"{args.output_dir}/{args.task}_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}_test_results.json"
 
-            # if not os.path.exists(json_file):
-            #     with open(json_file, mode="w", encoding="utf-8") as writer:
-            #         writer.write(json.dumps(ext_test_stats, indent=None))
+        # if not os.path.exists(json_file):
+        #     with open(json_file, mode="w", encoding="utf-8") as writer:
+        #         writer.write(json.dumps(ext_test_stats, indent=None))
+        #         writer.write('\n')
+        # else:
+        with open(json_file, mode="a+", encoding="utf-8") as writer:
+            writer.write(json.dumps(ext_test_stats, indent=None))
+            writer.write('\n')
+        print("Write results to %s" % json_file)
+
+        print(
+            f"Accuracy of the network on the {len(query_dataloader.dataset)} test images: {ext_test_stats[task_key]:.3f}%")
+
+        if args.build_ranking:
+            raise NotImplementedError
+            # rank_file = f"{args.task}_{args.num_max_bpe_tokens}tokens_{''.join(data_loader_test.dataset.text_features)}_{args.finetune.split('/')[-1]}_test_ranking.json"
+            # print("Write ranking results to %s" % json_file)
+            #
+            # text_to_image_rank_file = args.output_dir + '/text_to_image_ranking_' + rank_file
+            # image_to_text_rank_file = args.output_dir + '/image_to_text_ranking_' + rank_file
+            #
+            # with open(text_to_image_rank_file, mode="w", encoding="utf-8") as writer:
+            #     for i in range(len(text_to_image_rank)):
+            #         key = text_to_image_rank[i]['query_id']
+            #         value = {'rank': text_to_image_rank[i]['rank'], 'scores': text_to_image_rank[i]['scores']}
+            #         writer.write(json.dumps({key : value}, indent=None))
             #         writer.write('\n')
-            # else:
-            with open(json_file, mode="a+", encoding="utf-8") as writer:
-                writer.write(json.dumps(ext_test_stats, indent=None))
-                writer.write('\n')
-            print("Write results to %s" % json_file)
+            # print("Write text to image ranking results to %s" % text_to_image_rank_file)
+            # with open(image_to_text_rank_file, mode="w", encoding="utf-8") as writer:
+            #     for i in range(len(image_to_text_rank)):
+            #         key = image_to_text_rank[i]['query_id']
+            #         value = {'rank': image_to_text_rank[i]['rank'], 'scores': image_to_text_rank[i]['scores']}
+            #         writer.write(json.dumps({key: value}, indent=None))
+            #     # writer.write(json.dumps(image_to_text_rank, indent=None))
+            #         writer.write('\n')
+            # print("Write image to text ranking results to %s" % image_to_text_rank_file)
 
-            print(
-                f"Accuracy of the network on the {len(query_dataloader.dataset)} test images: {ext_test_stats[task_key]:.3f}%")
-
-            if args.build_ranking:
-                raise NotImplementedError
-                # rank_file = f"{args.task}_{args.num_max_bpe_tokens}tokens_{''.join(data_loader_test.dataset.text_features)}_{args.finetune.split('/')[-1]}_test_ranking.json"
-                # print("Write ranking results to %s" % json_file)
-                #
-                # text_to_image_rank_file = args.output_dir + '/text_to_image_ranking_' + rank_file
-                # image_to_text_rank_file = args.output_dir + '/image_to_text_ranking_' + rank_file
-                #
-                # with open(text_to_image_rank_file, mode="w", encoding="utf-8") as writer:
-                #     for i in range(len(text_to_image_rank)):
-                #         key = text_to_image_rank[i]['query_id']
-                #         value = {'rank': text_to_image_rank[i]['rank'], 'scores': text_to_image_rank[i]['scores']}
-                #         writer.write(json.dumps({key : value}, indent=None))
-                #         writer.write('\n')
-                # print("Write text to image ranking results to %s" % text_to_image_rank_file)
-                # with open(image_to_text_rank_file, mode="w", encoding="utf-8") as writer:
-                #     for i in range(len(image_to_text_rank)):
-                #         key = image_to_text_rank[i]['query_id']
-                #         value = {'rank': image_to_text_rank[i]['rank'], 'scores': image_to_text_rank[i]['scores']}
-                #         writer.write(json.dumps({key: value}, indent=None))
-                #     # writer.write(json.dumps(image_to_text_rank, indent=None))
-                #         writer.write('\n')
-                # print("Write image to text ranking results to %s" % image_to_text_rank_file)
-
-            exit(0)
+        exit(0)
 
 
     print(f"Start training for {args.epochs} epochs")
@@ -477,43 +491,43 @@ def main(args, ds_init):
                     loss_scaler=loss_scaler, epoch=epoch, model_ema=model_ema)
 
         # evaluate on the test set
+        if args.eval_freq > 0 and (epoch + 1) % args.eval_freq == 0:
+            if args.task not in ["coco_captioning", "nocaps"]:
+                test_stats, task_key = evaluate(query_dataloader=query_dataloader, answer_dataloader=ref_dataloader, model=model,
+                                   device=device, handler=task_handler, args=args,)
 
-        if args.task not in ["coco_captioning", "nocaps"]:
-            test_stats, task_key = evaluate(query_dataloader=query_dataloader, answer_dataloader=ref_dataloader, model=model,
-                               device=device, handler=task_handler, args=args,)
+                print(f"Performance of the network on the {len(query_dataloader.dataset)} val images: {test_stats[task_key]:.1f}%")
+            if max_accuracy < test_stats[task_key]:
+                max_accuracy = test_stats[task_key]
+                if args.output_dir and args.save_ckpt:
+                    utils.save_model(
+                        args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
+                        loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
 
-            print(f"Performance of the network on the {len(query_dataloader.dataset)} val images: {test_stats[task_key]:.1f}%")
-        if max_accuracy < test_stats[task_key]:
-            max_accuracy = test_stats[task_key]
-            if args.output_dir and args.save_ckpt:
-                utils.save_model(
-                    args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
-                    loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
+                print(f'Max performance: {max_accuracy:.2f}%')
+                if log_writer is not None:
+                    log_writer.update(acc=test_stats[task_key], head="perf", step=epoch)
 
-            print(f'Max performance: {max_accuracy:.2f}%')
-            if log_writer is not None:
-                log_writer.update(acc=test_stats[task_key], head="perf", step=epoch)
+            log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
+                         **{f'test_{k}': v for k, v in test_stats.items()},
+                         'epoch': epoch,
+                         'n_parameters': n_parameters}
+            # else:
+            #     log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
+            #                  # **{f'test_{k}': v for k, v in test_stats.items()},
+            #                  'epoch': epoch,
+            #                  'n_parameters': n_parameters}
 
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-                     **{f'test_{k}': v for k, v in test_stats.items()},
-                     'epoch': epoch,
-                     'n_parameters': n_parameters}
-        # else:
-        #     log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-        #                  # **{f'test_{k}': v for k, v in test_stats.items()},
-        #                  'epoch': epoch,
-        #                  'n_parameters': n_parameters}
+            if utils.is_main_process() and args.enable_wandb:
+                wandb.log(log_stats)
 
-        if utils.is_main_process() and args.enable_wandb:
-            wandb.log(log_stats)
+            if args.output_dir and utils.is_main_process():
+                if log_writer is not None:
+                    log_writer.flush()
 
-        if args.output_dir and utils.is_main_process():
-            if log_writer is not None:
-                log_writer.flush()
-
-            result_file_path = os.path.join(args.output_dir, f"{args.task}_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}_test_results.txt")
-            with open(result_file_path, mode="a+", encoding="utf-8") as f:
-                f.write(json.dumps(log_stats) + "\n")
+                result_file_path = os.path.join(args.output_dir, f"{args.task}_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}_test_results.txt")
+                with open(result_file_path, mode="a+", encoding="utf-8") as f:
+                    f.write(json.dumps(log_stats) + "\n")
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

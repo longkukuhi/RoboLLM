@@ -36,7 +36,7 @@ class TaskHandler(object):
         raise NotImplementedError()
 
 
-class ArmbenchHandler(object):
+class ArmbenchHandlerAllref(object):
     def __init__(self,) -> None:
         super().__init__()
         self.query_image_feats = []
@@ -194,6 +194,219 @@ class ArmbenchHandler(object):
         # else:
         #     return eval_result, "average_score"
 
+    def eval_batch(self, model, pick_image=None, ref_image=None, pick_id=None, ref_id=None, padding_mask=None):
+        query_images = pick_image
+
+        if query_images is not None and ref_image is not None:
+            query_vision_cls, ref_vision_cls = model(query_images=query_images, ref_image=ref_image, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            # self.text_feats.append(language_cls.clone())
+            self.pick_ids.append(pick_id.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
+
+        elif query_images is not None and ref_image is None:
+            query_vision_cls, _ = model(query_images=query_images, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.pick_ids.append(pick_id.detach().cpu())
+
+        elif query_images is None and ref_image is not None:
+            _, ref_vision_cls = model(ref_image=ref_image, only_infer=True)
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
+
+
+class ArmbenchHandler(object):
+    def __init__(self,) -> None:
+        super().__init__()
+        self.query_image_feats = []
+        self.ref_image_feats = []
+        self.text_feats = []
+        self.pick_ids = []
+        self.ref_ids = []
+        self.metric_logger = None
+
+
+    def train_batch(self, model, query_images, ref_image, pick_id, language_tokens=None, padding_mask=None):
+        # calculate query and ref features
+        loss, _, _ = model(query_images=query_images, ref_image=ref_image)
+        # calculate cross entropy loss
+
+        return {
+            "loss": loss,
+        }
+
+
+    def before_eval(self, metric_logger, **kwargs):
+        self.query_image_feats.clear()
+        self.ref_image_feats.clear()
+        self.text_feats.clear()
+        self.pick_ids.clear()
+        self.ref_ids.clear()
+        self.metric_logger = metric_logger
+
+    def eval_batch(self, model,  query_images=None,  ref_image=None, pick_id=None, ref_id=None, padding_mask=None):
+        if query_images is not None and ref_image is not None:
+            query_vision_cls, ref_vision_cls = model(query_images=query_images, ref_image=ref_image, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            # self.text_feats.append(language_cls.clone())
+            self.pick_ids.append(pick_id.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
+
+        elif query_images is not None and ref_image is None:
+            query_vision_cls, _ = model(query_images=query_images, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.pick_ids.append(pick_id.detach().cpu())
+
+        elif query_images is None and ref_image is not None:
+            _, ref_vision_cls = model(ref_image=ref_image, only_infer=True)
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
+
+    def calculate_recall_at_k(self, topk, labels, ref_dataloader,  k=10):
+        correct = 0.0
+        for i in range(len(labels)):
+            predict_label = ref_dataloader.dataset._get_item_id(topk[i].tolist())
+            if labels[i] in predict_label:
+                correct += 1.0
+
+        return correct / len(labels)
+
+    def calculate_accuracy_at_k(self, topk, labels, ref_dataloader, k=10):
+        correct = 0.0
+        from collections import Counter
+        for i in range(len(labels)):
+            predict_label = ref_dataloader.dataset._get_item_id(topk[i].tolist())
+            predict_label = Counter(predict_label).most_common(1)[0][0]
+            if predict_label == labels[i]:
+                correct += 1.0
+
+        return correct / len(labels)
+
+    def after_eval(self, query_dataloader, ref_dataloader, build_ranking=False, **kwargs):
+
+        pickids = torch.cat(self.pick_ids, dim=0)
+        refids = torch.cat(self.ref_ids, dim=0)
+
+        query_cls_feats = torch.Tensor.float(torch.cat(self.query_image_feats, dim=0))  # .to('cuda')
+        ref_cls_feats = torch.Tensor.float(torch.cat(self.ref_image_feats, dim=0))  # .to('cuda')
+
+        labels = query_dataloader.dataset._get_class_id(pickids.tolist())
+        ref_item_ids = ref_dataloader.dataset._get_item_id(refids.tolist())
+
+        scores = query_cls_feats @ ref_cls_feats.t()
+
+        pickids = torch.LongTensor(pickids).to(scores.device)
+        refids = torch.LongTensor(refids).to(scores.device)
+        # labels = labels.to(scores.device)
+        # ref_item_ids = ref_item_ids.to(scores.device)
+
+        # iids = torch.LongTensor(iids).to(scores.device)
+
+        print("scores: {}".format(scores.size()))
+        print("pickids: {}".format(pickids.size()))
+        print("refids: {}".format(refids.size()))
+
+        # select score base on pickids and ref gallary ids
+        pick_ids =  query_dataloader.dataset._get_pick_id(pickids.tolist()) # real pick ids in string
+        per_pick_ref_ids = ref_dataloader.dataset._get_per_pick_ref_ids(pick_ids)
+        # per_pick_ref_ids = torch.as_tensor(per_pick_ref_ids).to(scores.device)
+        # per_pick_ref_ids = torch.LongTensor(per_pick_ref_ids).to(scores.device)
+        per_pick_ref_ids = np.array(per_pick_ref_ids, dtype=object)
+        # select score base on pickids and ref gallary ids
+        # per_pick_ref_ids = torch.tensor([1,2,3,6,10,12])
+
+        all_topk5_iids = []
+        all_topk3_iids = []
+        all_topk2_iids = []
+        all_topk1_iids = []
+
+        for i in range(len(scores)):
+            reduced_scores = scores[i][per_pick_ref_ids[i]]
+            # reduced_scores = scores[i,[23, 24, 25, 26, 27, 28, 29, 30, 31, 32]]
+            topk5 = reduced_scores.topk(5, dim=0)
+            topk3 = reduced_scores.topk(3, dim=0)
+            topk2 = reduced_scores.topk(2, dim=0)
+            topk1 = reduced_scores.topk(1, dim=0)
+
+            per_pick_ref_id = np.array(per_pick_ref_ids[i])
+            # topk10_iids = refids[topk10.indices]
+            topk5_iids = per_pick_ref_id[topk5.indices.tolist()]
+            topk3_iids = per_pick_ref_id[topk3.indices.tolist()]
+            topk2_iids = per_pick_ref_id[topk2.indices.tolist()]
+            topk1_iids = per_pick_ref_id[topk1.indices.tolist()]
+
+            topk5_iids = topk5_iids
+            topk3_iids = topk3_iids
+            topk2_iids = topk2_iids
+            topk1_iids = topk1_iids
+
+            all_topk5_iids.append(topk5_iids)
+            all_topk3_iids.append(topk3_iids)
+            all_topk2_iids.append(topk2_iids)
+            all_topk1_iids.append(topk1_iids)
+
+
+
+        # tr_r10 = self.calculate_recall_at_k(topk10_iids, labels, ref_item_ids, k=10)
+        tr_r5 = self.calculate_recall_at_k(all_topk5_iids, labels, ref_dataloader, k=5)
+        tr_r3 = self.calculate_recall_at_k(all_topk3_iids, labels, ref_dataloader, k=3)
+        tr_r2 = self.calculate_recall_at_k(all_topk2_iids, labels, ref_dataloader, k=2)
+        tr_r1 = self.calculate_recall_at_k(all_topk1_iids, labels, ref_dataloader, k=1)
+
+        # acc_r10 = self.calculate_accuracy_at_k(topk10_iids, labels, ref_item_ids, k=10)
+        acc_r5 = self.calculate_accuracy_at_k(all_topk5_iids, labels, ref_dataloader, k=5)
+        acc_r3 = self.calculate_accuracy_at_k(all_topk3_iids, labels, ref_dataloader, k=3)
+        acc_r2 = self.calculate_accuracy_at_k(all_topk2_iids, labels, ref_dataloader, k=2)
+        acc_r1 = self.calculate_accuracy_at_k(all_topk1_iids, labels, ref_dataloader, k=1)
+
+        eval_result = {
+            "tr_r1": tr_r1 * 100.0,
+            "tr_r2": tr_r2 * 100.0,
+            "tr_r3": tr_r3 * 100.0,
+            "tr_r5": tr_r5 * 100.0,
+
+            # "tr_r10": tr_r10 * 100.0,
+
+            "acc_r1": acc_r1 * 100.0,
+            "acc_r2": acc_r2 * 100.0,
+            "acc_r3": acc_r3 * 100.0,
+            "acc_r5": acc_r5 * 100.0,
+            # "acc_r10": acc_r10 * 100.0,
+
+            "average_score": (tr_r1 + tr_r2 + tr_r3 + tr_r5 + acc_r1 + acc_r2 + acc_r3 + acc_r5) / 8.0
+        }
+
+        print('* Eval result = %s' % json.dumps(eval_result))
+        return eval_result, "average_score"
+
+        # if build_ranking:
+        #     return eval_result, "average_score", text_to_image_rank, image_to_text_rank
+        #
+        # else:
+        #     return eval_result, "average_score"
+
+    def eval_batch(self, model, pick_image=None, ref_image=None, pick_id=None, ref_id=None, padding_mask=None):
+        query_images = pick_image
+
+        if query_images is not None and ref_image is not None:
+            query_vision_cls, ref_vision_cls = model(query_images=query_images, ref_image=ref_image, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            # self.text_feats.append(language_cls.clone())
+            self.pick_ids.append(pick_id.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
+
+        elif query_images is not None and ref_image is None:
+            query_vision_cls, _ = model(query_images=query_images, only_infer=True)
+            self.query_image_feats.append(query_vision_cls.detach().cpu())
+            self.pick_ids.append(pick_id.detach().cpu())
+
+        elif query_images is None and ref_image is not None:
+            _, ref_vision_cls = model(ref_image=ref_image, only_infer=True)
+            self.ref_image_feats.append(ref_vision_cls.detach().cpu())
+            self.ref_ids.append(ref_id.detach().cpu())
 
 class Armbench3t1Handler(TaskHandler):
     def __init__(self,) -> None:
@@ -273,7 +486,6 @@ class Armbench3t1Handler(TaskHandler):
 
 
 
-
     def build_rank(self, data_loader, topk, values, query_data_type, k=1000):
         all_rank = []
         topk = topk.detach().cpu() #.reshape(-1, k)
@@ -305,7 +517,7 @@ class Armbench3t1Handler(TaskHandler):
 
         return all_rank
 
-    
+
     def calculate_recall_at_k(self, topk, labels, ref_item_ids, k=10):
         correct = 0.0
         for i in range(len(labels)):
@@ -313,7 +525,7 @@ class Armbench3t1Handler(TaskHandler):
                 correct += 1.0
 
         return correct / len(labels)
-    
+
     def calculate_accuracy_at_k(self, topk, labels, ref_item_ids, k=10):
         correct = 0.0
         from collections import Counter
@@ -388,7 +600,7 @@ class Armbench3t1Handler(TaskHandler):
         tr_r3 = self.calculate_recall_at_k(topk3_iids, labels, ref_item_ids, k=3)
         tr_r2 = self.calculate_recall_at_k(topk2_iids, labels, ref_item_ids, k=2)
         tr_r1 = self.calculate_recall_at_k(topk1_iids, labels, ref_item_ids, k=1)
-        
+
         # acc_r10 = self.calculate_accuracy_at_k(topk10_iids, labels, ref_item_ids, k=10)
         acc_r5 = self.calculate_accuracy_at_k(topk5_iids, labels, ref_item_ids, k=5)
         acc_r3 = self.calculate_accuracy_at_k(topk3_iids, labels, ref_item_ids, k=3)
@@ -402,7 +614,7 @@ class Armbench3t1Handler(TaskHandler):
             "tr_r5": tr_r5 * 100.0,
 
             # "tr_r10": tr_r10 * 100.0,
-            
+
             "acc_r1": acc_r1 * 100.0,
             "acc_r2": acc_r2 * 100.0,
             "acc_r3": acc_r3 * 100.0,
@@ -422,7 +634,23 @@ class Armbench3t1Handler(TaskHandler):
         #     return eval_result, "average_score"
 
 
+
 class ArmbenchPick1Handler(ArmbenchHandler):
+    def __init__(self, ) -> None:
+        super().__init__()
+
+    def train_batch(self, model, pick_image, ref_image, pick_id, language_tokens=None, padding_mask=None, **kwargs):
+        # calculate query and ref features
+        loss, _, _ = model(query_images=pick_image, ref_image=ref_image)
+        # calculate cross entropy loss
+
+        return {
+            "loss": loss,
+        }
+
+
+
+class ArmbenchPick1t1Handler(ArmbenchHandler):
     def __init__(self, ) -> None:
         super().__init__()
 
@@ -457,15 +685,48 @@ class ArmbenchPick1Handler(ArmbenchHandler):
             self.ref_ids.append(ref_id.detach().cpu())
 
 
+class ArmbenchPick1CLlossHandler(ArmbenchHandler):
+    def __init__(self, ) -> None:
+        super().__init__()
 
+    def train_batch(self, model, pick_image, ref_image, ref_id,
+                    language_tokens=None, padding_mask=None, **kwargs):
+        # calculate query and ref features
+        loss, _, _ = model(query_images=pick_image, ref_image=ref_image, ref_id=ref_id)
+        # calculate cross entropy loss
+
+        return {
+            "loss": loss,
+        }
+
+class ArmbenchPick1NearestRefHandler(ArmbenchHandler):
+    def __init__(self, ) -> None:
+        super().__init__()
+
+    def train_batch(self, model, pick_image, ref_images, ref_id,
+                    language_tokens=None, padding_mask=None, **kwargs):
+        # calculate query and ref features
+        loss, _, = model(query_images=pick_image, ref_images=ref_images, ref_id=ref_id)
+        # calculate cross entropy loss
+
+        return {
+            "loss": loss,
+        }
 
 
 def get_handler(args):
     if args.task == "armbench3t1":
         return Armbench3t1Handler()
 
-    elif args.task == "armbenchpick1":
+    elif args.task in "armbenchpick1":
         return ArmbenchPick1Handler()
+
+    elif args.task == "armbenchpick1to1":
+        return ArmbenchPick1t1Handler()
+    elif args.task == "armbenchpick1_clloss":
+        return ArmbenchPick1CLlossHandler()
+    elif args.task == "armbenchpick1_nearestref":
+        return ArmbenchPick1NearestRefHandler()
 
     else:
         raise NotImplementedError("Sorry, %s is not support." % args.task)
@@ -487,7 +748,7 @@ def train_one_epoch(
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
-    print_freq = 20
+    print_freq = 200
 
     if loss_scaler is None:
         model.zero_grad()
@@ -505,9 +766,11 @@ def train_one_epoch(
                     param_group["lr"] = lr_schedule_values[global_step] * param_group["lr_scale"]
         # put input data into cuda
         for tensor_key in data.keys():
-            data[tensor_key] = data[tensor_key].to(device, non_blocking=True)
+            if not isinstance(data[tensor_key], list):
+                # data[tensor_key] = [t.to(device, non_blocking=True) for t in data[tensor_key]]
+                data[tensor_key] = data[tensor_key].to(device, non_blocking=True)
             # print("input %s = %s" % (tensor_key, data[tensor_key]))
-            if loss_scaler is None and tensor_key.startswith("image"):
+            if loss_scaler is None and 'image' in tensor_key:
                 data[tensor_key] = data[tensor_key].half()
 
         # pick_images = [data['image0'], data['image1'], data['image2']]
