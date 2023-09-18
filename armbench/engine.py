@@ -4,6 +4,7 @@ import sys
 import json
 from typing import Iterable, Optional
 
+from sklearn.metrics import confusion_matrix, classification_report
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -408,7 +409,7 @@ class ArmbenchHandler(object):
             self.ref_image_feats.append(ref_vision_cls.detach().cpu())
             self.ref_ids.append(ref_id.detach().cpu())
 
-class Armbench3t1Handler(TaskHandler):
+class Armbench3t1Handler(ArmbenchHandler):
     def __init__(self,) -> None:
         super().__init__()
         self.query_image_feats = []
@@ -423,25 +424,6 @@ class Armbench3t1Handler(TaskHandler):
         # with open(os.path.join(data_path, 'Picks_splits', 'test_label_dict.json',  'r')) as f:
         #     self.test_labels = json.load(f)
 
-    # def before_train(self):
-    #     self.ref_image_feats.clear()
-    #     self.ref_ids.clear()
-
-    # def build_ref_feats(self, model, ref_image, ref_id, language_tokens=None, padding_mask=None):
-    #     _, ref_vision_cls = model(query_images=None, ref_image=ref_image)
-    #     self.ref_image_feats.append(ref_vision_cls.clone())
-    #     self.ref_ids.append(ref_id)
-
-
-    # def train_batch(self, model, query_images, ref_image, pick_id, language_tokens=None, padding_mask=None, **kwargs):
-    #     # calculate query and ref features
-    #     pick_images = [data['image0'], data['image1'], data['image2']]
-    #     loss, _, _ = model(query_images=query_images, ref_image=ref_image)
-    #     # calculate cross entropy loss
-    #
-    #     return {
-    #         "loss": loss,
-    #     }
 
     def train_batch(self, model, image0, image1, image2, ref_image, pick_id, language_tokens=None, padding_mask=None, **kwargs):
         # calculate query and ref features
@@ -463,8 +445,11 @@ class Armbench3t1Handler(TaskHandler):
         self.ref_ids.clear()
         self.metric_logger = metric_logger
 
-    def eval_batch(self, model,  image0, image1, image2,  ref_image=None, pick_id=None, ref_id=None, padding_mask=None):
-        query_images = [image0, image1, image2]
+    def eval_batch(self, model,  image0=None, image1=None, image2=None,  ref_image=None, pick_id=None, ref_id=None, padding_mask=None):
+        if image0 is not None:
+            query_images = [image0, image1, image2]
+        else:
+            query_images = None
 
         if query_images is not None and ref_image is not None:
             query_vision_cls, ref_vision_cls = model(query_images=query_images, ref_image=ref_image, only_infer=True)
@@ -486,153 +471,153 @@ class Armbench3t1Handler(TaskHandler):
 
 
 
-    def build_rank(self, data_loader, topk, values, query_data_type, k=1000):
-        all_rank = []
-        topk = topk.detach().cpu() #.reshape(-1, k)
-        values = values.detach().cpu() #.reshape(-1, k)
-
-        if query_data_type == 'img':
-            retrieval_type = 'text'
-        elif query_data_type == 'text':
-            retrieval_type = 'img'
-
-        print(f"Build rank list for {query_data_type} to {retrieval_type}")
-
-        for idx in tqdm(range(topk.shape[0])):
-            if query_data_type == 'img':
-                item_id = data_loader.dataset._get_img_id(idx)
-            elif query_data_type == 'text':
-                item_id = data_loader.dataset._get_text_id(idx)
-
-            rank_list = topk[idx].tolist()
-            # transfer rank idx to item id
-            if retrieval_type == 'img':
-                rank_list = data_loader.dataset._get_img_id(rank_list)
-            elif retrieval_type == 'text':
-                rank_list = data_loader.dataset._get_text_id(rank_list)
-
-            all_rank.append({'query_id': item_id,
-                            'rank': rank_list,
-                            'scores': values[idx].tolist()})
-
-        return all_rank
-
-
-    def calculate_recall_at_k(self, topk, labels, ref_item_ids, k=10):
-        correct = 0.0
-        for i in range(len(labels)):
-            if labels[i] in [ref_item_ids[index] for index in topk[i].tolist()]:
-                correct += 1.0
-
-        return correct / len(labels)
-
-    def calculate_accuracy_at_k(self, topk, labels, ref_item_ids, k=10):
-        correct = 0.0
-        from collections import Counter
-        for i in range(len(labels)):
-            predict_label = Counter([ref_item_ids[index] for index in topk[i].tolist()]).most_common(1)[0][0]
-            if predict_label == labels[i]:
-                correct += 1.0
-
-        return correct / len(labels)
-
-
-
-    def after_eval(self, query_dataloader, ref_dataloader, build_ranking=False, **kwargs):
-
-        # query_image_feats = {}
-        # for feats, ids in zip(self.query_image_feats, self.pick_ids):
-        #     for i, _idx in enumerate(ids):
-        #         idx = _idx.item()
-        #         if idx not in query_image_feats:
-        #             query_image_feats[idx] = feats[i]
-        #
-        pickids = torch.cat(self.pick_ids, dim=0)
-        refids = torch.cat(self.ref_ids, dim=0)
-        # iids = []
-        # sorted_tensors = []
-        # for key in sorted(query_image_feats.keys()):
-        #     sorted_tensors.append(query_image_feats[key].view(1, -1))
-        #     iids.append(key)
-        #
-        query_cls_feats = torch.Tensor.float(torch.cat(self.query_image_feats, dim=0)) #.to('cuda')
-        ref_cls_feats = torch.Tensor.float(torch.cat(self.ref_image_feats, dim=0)) #.to('cuda')
-
-        labels = query_dataloader.dataset._get_class_id(pickids.tolist())
-        ref_item_ids = ref_dataloader.dataset._get_item_id(refids.tolist())
-
-        scores = query_cls_feats @ ref_cls_feats.t()
-
-
-        pickids = torch.LongTensor(pickids).to(scores.device)
-        refids = torch.LongTensor(refids).to(scores.device)
-        # labels = labels.to(scores.device)
-        # ref_item_ids = ref_item_ids.to(scores.device)
-
-        # iids = torch.LongTensor(iids).to(scores.device)
-
-        print("scores: {}".format(scores.size()))
-        print("pickids: {}".format(pickids.size()))
-        print("refids: {}".format(refids.size()))
-
-
-
-        # topk10 = scores.topk(10, dim=1)
-        topk5 = scores.topk(5, dim=1)
-        topk3 = scores.topk(3, dim=1)
-        topk2 = scores.topk(2, dim=1)
-        topk1 = scores.topk(1, dim=1)
-
-        # topk10_iids = refids[topk10.indices]
-        topk5_iids = refids[topk5.indices]
-        topk3_iids = refids[topk3.indices]
-        topk2_iids = refids[topk2.indices]
-        topk1_iids = refids[topk1.indices]
-
-        # topk10_iids = topk10_iids.detach().cpu()
-        topk5_iids = topk5_iids.detach().cpu()
-        topk3_iids = topk3_iids.detach().cpu()
-        topk2_iids = topk2_iids.detach().cpu()
-        topk1_iids = topk1_iids.detach().cpu()
-
-        # tr_r10 = self.calculate_recall_at_k(topk10_iids, labels, ref_item_ids, k=10)
-        tr_r5 = self.calculate_recall_at_k(topk5_iids, labels, ref_item_ids, k=5)
-        tr_r3 = self.calculate_recall_at_k(topk3_iids, labels, ref_item_ids, k=3)
-        tr_r2 = self.calculate_recall_at_k(topk2_iids, labels, ref_item_ids, k=2)
-        tr_r1 = self.calculate_recall_at_k(topk1_iids, labels, ref_item_ids, k=1)
-
-        # acc_r10 = self.calculate_accuracy_at_k(topk10_iids, labels, ref_item_ids, k=10)
-        acc_r5 = self.calculate_accuracy_at_k(topk5_iids, labels, ref_item_ids, k=5)
-        acc_r3 = self.calculate_accuracy_at_k(topk3_iids, labels, ref_item_ids, k=3)
-        acc_r2 = self.calculate_accuracy_at_k(topk2_iids, labels, ref_item_ids, k=2)
-        acc_r1 = self.calculate_accuracy_at_k(topk1_iids, labels, ref_item_ids, k=1)
-
-        eval_result = {
-            "tr_r1": tr_r1 * 100.0,
-            "tr_r2": tr_r2 * 100.0,
-            "tr_r3": tr_r3 * 100.0,
-            "tr_r5": tr_r5 * 100.0,
-
-            # "tr_r10": tr_r10 * 100.0,
-
-            "acc_r1": acc_r1 * 100.0,
-            "acc_r2": acc_r2 * 100.0,
-            "acc_r3": acc_r3 * 100.0,
-            "acc_r5": acc_r5 * 100.0,
-            # "acc_r10": acc_r10 * 100.0,
-
-            "average_score": (tr_r1 + tr_r2 + tr_r3 + tr_r5 + acc_r1 + acc_r2 + acc_r3 + acc_r5) / 8.0
-        }
-
-        print('* Eval result = %s' % json.dumps(eval_result))
-        return eval_result, "average_score"
-
-        # if build_ranking:
-        #     return eval_result, "average_score", text_to_image_rank, image_to_text_rank
-        #
-        # else:
-        #     return eval_result, "average_score"
-
+    # def build_rank(self, data_loader, topk, values, query_data_type, k=1000):
+    #     all_rank = []
+    #     topk = topk.detach().cpu() #.reshape(-1, k)
+    #     values = values.detach().cpu() #.reshape(-1, k)
+    #
+    #     if query_data_type == 'img':
+    #         retrieval_type = 'text'
+    #     elif query_data_type == 'text':
+    #         retrieval_type = 'img'
+    #
+    #     print(f"Build rank list for {query_data_type} to {retrieval_type}")
+    #
+    #     for idx in tqdm(range(topk.shape[0])):
+    #         if query_data_type == 'img':
+    #             item_id = data_loader.dataset._get_img_id(idx)
+    #         elif query_data_type == 'text':
+    #             item_id = data_loader.dataset._get_text_id(idx)
+    #
+    #         rank_list = topk[idx].tolist()
+    #         # transfer rank idx to item id
+    #         if retrieval_type == 'img':
+    #             rank_list = data_loader.dataset._get_img_id(rank_list)
+    #         elif retrieval_type == 'text':
+    #             rank_list = data_loader.dataset._get_text_id(rank_list)
+    #
+    #         all_rank.append({'query_id': item_id,
+    #                         'rank': rank_list,
+    #                         'scores': values[idx].tolist()})
+    #
+    #     return all_rank
+    #
+    #
+    # def calculate_recall_at_k(self, topk, labels, ref_item_ids, k=10):
+    #     correct = 0.0
+    #     for i in range(len(labels)):
+    #         if labels[i] in [ref_item_ids[index] for index in topk[i].tolist()]:
+    #             correct += 1.0
+    #
+    #     return correct / len(labels)
+    #
+    # def calculate_accuracy_at_k(self, topk, labels, ref_item_ids, k=10):
+    #     correct = 0.0
+    #     from collections import Counter
+    #     for i in range(len(labels)):
+    #         predict_label = Counter([ref_item_ids[index] for index in topk[i].tolist()]).most_common(1)[0][0]
+    #         if predict_label == labels[i]:
+    #             correct += 1.0
+    #
+    #     return correct / len(labels)
+    #
+    #
+    #
+    # def after_eval(self, query_dataloader, ref_dataloader, build_ranking=False, **kwargs):
+    #
+    #     # query_image_feats = {}
+    #     # for feats, ids in zip(self.query_image_feats, self.pick_ids):
+    #     #     for i, _idx in enumerate(ids):
+    #     #         idx = _idx.item()
+    #     #         if idx not in query_image_feats:
+    #     #             query_image_feats[idx] = feats[i]
+    #     #
+    #     pickids = torch.cat(self.pick_ids, dim=0)
+    #     refids = torch.cat(self.ref_ids, dim=0)
+    #     # iids = []
+    #     # sorted_tensors = []
+    #     # for key in sorted(query_image_feats.keys()):
+    #     #     sorted_tensors.append(query_image_feats[key].view(1, -1))
+    #     #     iids.append(key)
+    #     #
+    #     query_cls_feats = torch.Tensor.float(torch.cat(self.query_image_feats, dim=0)) #.to('cuda')
+    #     ref_cls_feats = torch.Tensor.float(torch.cat(self.ref_image_feats, dim=0)) #.to('cuda')
+    #
+    #     labels = query_dataloader.dataset._get_class_id(pickids.tolist())
+    #     ref_item_ids = ref_dataloader.dataset._get_item_id(refids.tolist())
+    #
+    #     scores = query_cls_feats @ ref_cls_feats.t()
+    #
+    #
+    #     pickids = torch.LongTensor(pickids).to(scores.device)
+    #     refids = torch.LongTensor(refids).to(scores.device)
+    #     # labels = labels.to(scores.device)
+    #     # ref_item_ids = ref_item_ids.to(scores.device)
+    #
+    #     # iids = torch.LongTensor(iids).to(scores.device)
+    #
+    #     print("scores: {}".format(scores.size()))
+    #     print("pickids: {}".format(pickids.size()))
+    #     print("refids: {}".format(refids.size()))
+    #
+    #
+    #
+    #     # topk10 = scores.topk(10, dim=1)
+    #     topk5 = scores.topk(5, dim=1)
+    #     topk3 = scores.topk(3, dim=1)
+    #     topk2 = scores.topk(2, dim=1)
+    #     topk1 = scores.topk(1, dim=1)
+    #
+    #     # topk10_iids = refids[topk10.indices]
+    #     topk5_iids = refids[topk5.indices]
+    #     topk3_iids = refids[topk3.indices]
+    #     topk2_iids = refids[topk2.indices]
+    #     topk1_iids = refids[topk1.indices]
+    #
+    #     # topk10_iids = topk10_iids.detach().cpu()
+    #     topk5_iids = topk5_iids.detach().cpu()
+    #     topk3_iids = topk3_iids.detach().cpu()
+    #     topk2_iids = topk2_iids.detach().cpu()
+    #     topk1_iids = topk1_iids.detach().cpu()
+    #
+    #     # tr_r10 = self.calculate_recall_at_k(topk10_iids, labels, ref_item_ids, k=10)
+    #     tr_r5 = self.calculate_recall_at_k(topk5_iids, labels, ref_item_ids, k=5)
+    #     tr_r3 = self.calculate_recall_at_k(topk3_iids, labels, ref_item_ids, k=3)
+    #     tr_r2 = self.calculate_recall_at_k(topk2_iids, labels, ref_item_ids, k=2)
+    #     tr_r1 = self.calculate_recall_at_k(topk1_iids, labels, ref_item_ids, k=1)
+    #
+    #     # acc_r10 = self.calculate_accuracy_at_k(topk10_iids, labels, ref_item_ids, k=10)
+    #     acc_r5 = self.calculate_accuracy_at_k(topk5_iids, labels, ref_item_ids, k=5)
+    #     acc_r3 = self.calculate_accuracy_at_k(topk3_iids, labels, ref_item_ids, k=3)
+    #     acc_r2 = self.calculate_accuracy_at_k(topk2_iids, labels, ref_item_ids, k=2)
+    #     acc_r1 = self.calculate_accuracy_at_k(topk1_iids, labels, ref_item_ids, k=1)
+    #
+    #     eval_result = {
+    #         "tr_r1": tr_r1 * 100.0,
+    #         "tr_r2": tr_r2 * 100.0,
+    #         "tr_r3": tr_r3 * 100.0,
+    #         "tr_r5": tr_r5 * 100.0,
+    #
+    #         # "tr_r10": tr_r10 * 100.0,
+    #
+    #         "acc_r1": acc_r1 * 100.0,
+    #         "acc_r2": acc_r2 * 100.0,
+    #         "acc_r3": acc_r3 * 100.0,
+    #         "acc_r5": acc_r5 * 100.0,
+    #         # "acc_r10": acc_r10 * 100.0,
+    #
+    #         "average_score": (tr_r1 + tr_r2 + tr_r3 + tr_r5 + acc_r1 + acc_r2 + acc_r3 + acc_r5) / 8.0
+    #     }
+    #
+    #     print('* Eval result = %s' % json.dumps(eval_result))
+    #     return eval_result, "average_score"
+    #
+    #     # if build_ranking:
+    #     #     return eval_result, "average_score", text_to_image_rank, image_to_text_rank
+    #     #
+    #     # else:
+    #     #     return eval_result, "average_score"
+    #
 
 
 class ArmbenchPick1Handler(ArmbenchHandler):
@@ -714,6 +699,65 @@ class ArmbenchPick1NearestRefHandler(ArmbenchHandler):
         }
 
 
+class ImageclassificationHandler(TaskHandler):
+    def __init__(self, args) -> None:
+        super().__init__()
+        mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+        if mixup_active:
+            # smoothing is handled with mixup label transform
+            self.criterion = SoftTargetCrossEntropy()
+        elif args.label_smoothing > 0.:
+            self.criterion = LabelSmoothingCrossEntropy(smoothing=args.label_smoothing)
+        else:
+            self.criterion = torch.nn.CrossEntropyLoss()
+        self.feats = []
+        self.labels = []
+        self.metric_logger = None
+
+    def before_eval(self, metric_logger, **kwargs):
+        self.feats = []
+        self.labels = []
+        self.metric_logger = metric_logger
+
+    def train_batch(self, model, image, label):
+        logits = model(image=image)
+        return {
+            "loss": self.criterion(logits, label),
+        }
+
+    def eval_batch(self, model, image, label):
+        logits = model(image=image)
+        batch_size = image.shape[0]
+        acc1,_ = accuracy(logits, label,topk=(1,2))
+        self.metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
+        self.feats.append(logits.detach().cpu())
+        self.labels.append(label.detach().cpu())
+        # self.metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
+
+
+    def compute_confusion_matrix(self,):
+        self.feats = torch.cat(self.feats, dim=0)
+        self.labels = torch.cat(self.labels, dim=0)
+        pred = self.feats.argmax(dim=1)
+        print(confusion_matrix(self.labels.cpu().numpy(), pred.cpu().numpy()))
+
+        # compute false positive rate
+        fpr_for_each_class = []
+        # for i in range(3):
+        #     fpr = confusion_matrix(self.labels.cpu().numpy(), pred.cpu().numpy(), labels=[i, 3])
+        #     fpr = fpr[1, 0] / (fpr[1, 0] + fpr[1, 1])
+        #     fpr_for_each_class.append(fpr)
+        classes = ['multi_pick', 'nominal', 'package_defect']
+        cls_report = classification_report(self.labels.cpu().numpy(), pred.cpu().numpy(), target_names=classes)
+        print(cls_report)
+        # print("fpr for class {}: {}".format(classes, fpr_for_each_class))
+
+    def after_eval(self, **kwargs):
+        self.compute_confusion_matrix()
+        print('* Acc@1 {top1.global_avg:.3f}'.format(top1=self.metric_logger.acc1))
+        return {k: meter.global_avg for k, meter in self.metric_logger.meters.items()}, "acc1"
+
+
 def get_handler(args):
     if args.task == "armbench3t1":
         return Armbench3t1Handler()
@@ -727,7 +771,8 @@ def get_handler(args):
         return ArmbenchPick1CLlossHandler()
     elif args.task == "armbenchpick1_nearestref":
         return ArmbenchPick1NearestRefHandler()
-
+    elif args.task == "defection1by1":
+        return ImageclassificationHandler(args)
     else:
         raise NotImplementedError("Sorry, %s is not support." % args.task)
 
@@ -922,3 +967,24 @@ def evaluate(query_dataloader, answer_dataloader, model, device, handler, args):
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     return handler.after_eval(query_dataloader, answer_dataloader, args)
+
+@torch.no_grad()
+def defection_evalate(data_loader, model, device, handler, build_ranking=False):
+    metric_logger = utils.MetricLogger(delimiter="  ")
+    header = 'Test:'
+
+    # switch to evaluation mode
+    model.eval()
+    handler.before_eval(metric_logger=metric_logger, data_loader=data_loader)
+
+    for data in metric_logger.log_every(data_loader, 100, header):
+        for tensor_key in data.keys():
+            data[tensor_key] = data[tensor_key].to(device, non_blocking=True)
+
+        with torch.cuda.amp.autocast():
+            handler.eval_batch(model=model, **data)
+
+    # gather the stats from all processes
+    metric_logger.synchronize_between_processes()
+
+    return handler.after_eval()

@@ -473,7 +473,31 @@ class BEiTForArmBenchRetrievalNearestRef(BEiT3Wrapper):
             return loss, query_vision_cls
 
 
+class BEiTFordefection(BEiT3Wrapper):
+    def __init__(
+            self,
+            args,
+            num_classes,
+            norm_layer=nn.LayerNorm,
+            **kwargs
+    ):
+        super(BEiTFordefection, self).__init__(args=args)
+        embed_dim = args.encoder_embed_dim
+        self.fc_norm = norm_layer(embed_dim)
+        self.head = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
 
+        self.fc_norm.apply(self._init_weights)
+        self.head.apply(self._init_weights)
+        init_scale = 0.001
+        if isinstance(self.head, nn.Linear):
+            self.head.weight.data.mul_(init_scale)
+            self.head.bias.data.mul_(init_scale)
+
+    def forward(self, image, **kwargs):
+        x = self.beit3(textual_tokens=None, visual_tokens=image)["encoder_out"]
+        t = x[:, 1:, :]
+        cls_x = self.fc_norm(t.mean(1))
+        return self.head(cls_x)
 
 @register_model
 def beit3_base_patch16_224_armbench3t1(pretrained=False, **kwargs):
@@ -506,4 +530,16 @@ def beit3_base_patch16_224_armbenchpick1_clloss(pretrained=False, **kwargs):
 def beit3_base_patch16_224_armbenchpick1_nearestref(pretrained=False, **kwargs):
     args = _get_base_config(**kwargs)
     model = BEiTForArmBenchRetrievalNearestRef(args, **kwargs)
+    return model
+
+@register_model
+def beit3_base_patch16_224_defection1by1(pretrained=False, **kwargs):
+    args = _get_base_config(**kwargs)
+    model = BEiTFordefection(args, **kwargs)
+    return model
+
+@register_model
+def beit3_large_patch16_224_defection1by1(pretrained=False, **kwargs):
+    args = _get_large_config(**kwargs)
+    model = BEiTFordefection(args, **kwargs)
     return model

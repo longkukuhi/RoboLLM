@@ -38,7 +38,8 @@ def get_args():
                         help='Name of model to train')
     parser.add_argument('--task', type=str, required=True,
                         choices=['armbench3t1','armbenchpick1', 'armbenchpick1to1',
-                                 'armbenchpick1_clloss', 'armbenchpick1_nearestref'],
+                                 'armbenchpick1_clloss', 'armbenchpick1_nearestref',
+                                 'defect'],
                         help='Name of task to fine-tuning')
 
     parser.add_argument('--input_size', default=224, type=int,
@@ -218,7 +219,7 @@ def get_args():
                         choices=['SupCon', 'SimCLR'], help='choose method')
 
     #eval_freq
-    parser.add_argument('--eval_freq', type=int, default=5,
+    parser.add_argument('--eval_freq', type=int, default=1,
                         help='evaluation frequency')
 
     known_args, _ = parser.parse_known_args()
@@ -288,7 +289,7 @@ def main(args, ds_init):
 
     if not args.model.endswith(args.task):
         if args.task in ["armbench3t1", "armbenchpick1", "armbenchpick1to1", "armbenchpick1_clloss",
-                         'armbenchpick1_nearestref']:
+                         'armbenchpick1_nearestref', 'defection1by1']:
             model_config = "%s_%s" % (args.model, args.task)
         else:
             raise Exception("Unknown task %s" % args.task)
@@ -421,8 +422,7 @@ def main(args, ds_init):
     # if args.task in ["armbench3t1", ]:
         if args.build_ranking:
             raise NotImplementedError
-            # ext_test_stats, task_key, text_to_image_rank, image_to_text_rank \
-            # = evaluate(data_loader_test, model, device, task_handler, build_ranking=True)
+
         else:
             ext_test_stats, task_key, \
                 = evaluate(query_dataloader=query_dataloader, answer_dataloader=ref_dataloader, model=model,
@@ -430,11 +430,7 @@ def main(args, ds_init):
 
         json_file = f"{args.output_dir}/{args.task}_{args.num_max_bpe_tokens}tokens_{args.finetune.split('/')[-1]}_test_results.json"
 
-        # if not os.path.exists(json_file):
-        #     with open(json_file, mode="w", encoding="utf-8") as writer:
-        #         writer.write(json.dumps(ext_test_stats, indent=None))
-        #         writer.write('\n')
-        # else:
+
         with open(json_file, mode="a+", encoding="utf-8") as writer:
             writer.write(json.dumps(ext_test_stats, indent=None))
             writer.write('\n')

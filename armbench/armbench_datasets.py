@@ -282,7 +282,6 @@ class ArmbenchDataset(Beit3baseDataset):
         return data
 
     def __len__(self) -> int:
-        return 50
         if self.args.task in ['armbench3t1' ,'armbenchpick1', 'armbenchpick1_clloss',
                               'armbenchpick1_nearestref']:
             return len(self.items)
