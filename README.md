@@ -1,14 +1,13 @@
 # [RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large Language Models]()
 
-Official PyTorch implementation for paper: RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large
-Language Models. 
+Official PyTorch implementation and pretrained models of BEiT-3. 
 
 
-### Download Checkpoints
+### Download pre-trained Checkpoints
 
 
-   - [`BEiT3-base-itc`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_base_itc_patch16_224.pth): #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16; #parameters: 222M
-   - [`BEiT3-large-itc`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_large_itc_patch16_224.pth): #layer=24; hidden=1024; FFN factor=4x; #head=16; patch=16x16; #parameters: 674M
+   - [`BEiT3-base`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_base_patch16_224.pth?sv=2021-10-04&st=2023-06-08T11%3A16%3A02Z&se=2033-06-09T11%3A16%3A00Z&sr=c&sp=r&sig=N4pfCVmSeq4L4tS8QbrFVsX6f6q844eft8xSuXdxU48%3D): #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16; #parameters: 222M
+   - [`BEiT3-large`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_large_patch16_224.pth?sv=2021-10-04&st=2023-06-08T11%3A16%3A02Z&se=2033-06-09T11%3A16%3A00Z&sr=c&sp=r&sig=N4pfCVmSeq4L4tS8QbrFVsX6f6q844eft8xSuXdxU48%3D): #layer=24; hidden=1024; FFN factor=4x; #head=16; patch=16x16; #parameters: 674M
 
 
 ### Text Tokenizer
@@ -60,8 +59,19 @@ python armbench/defection_id.py --model 'beit3_base_patch16_224' --input_size 22
 ## Citation
 If you find this repository useful, please consider citing our work:
 ```
-
+@misc{long2023robollm,
+      title={RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large Language Models}, 
+      author={Zijun Long and George Killick and Richard McCreadie and Gerardo Aragon Camarasa},
+      year={2023},
+      eprint={2310.10221},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
 ```
+
+## Todo
+- Fine-tuned checkpoints will be released after the accecptence of this paper.
+
 
 
 ## Acknowledgement
