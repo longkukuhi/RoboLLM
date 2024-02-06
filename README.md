@@ -33,6 +33,17 @@ install required packages:
 pip install -r requirements.txt
 ```
 
+### Download our preprossed json files
+
+#### For the Armbench identification task
+Download this file and put them into the armbench dataset dir.
+[json_files.zip](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/EdUm-c9sJwpPp4Ir-ve7xjoBVBdGtXuyy4S3nz9RJHbFkA?e=3mL2U0)
+
+<!-- #### For the Armbench identification task -->
+
+
+
+
 ### (Optional) Download our fine-tuned checkpoint
 
 Will be released very soon
