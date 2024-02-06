@@ -1,7 +1,11 @@
-# [RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large Language Models]()
+# [RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large Language Models](https://arxiv.org/abs/2310.10221)
 
-Official PyTorch implementation and pretrained models of BEiT-3. 
+Official PyTorch implementation and pretrained models for paper:   "[RoboLLM: Robotic Vision Tasks Grounded on Multimodal Large Language Models.](https://arxiv.org/pdf/2310.10221.pdf)"
 
+## Updates
+- [2024/01/31] Accepted to ICRA 2024!
+
+## Setup
 
 ### Download pre-trained Checkpoints
 
@@ -9,16 +13,16 @@ Official PyTorch implementation and pretrained models of BEiT-3.
    - [`BEiT3-base`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_base_patch16_224.pth?sv=2021-10-04&st=2023-06-08T11%3A16%3A02Z&se=2033-06-09T11%3A16%3A00Z&sr=c&sp=r&sig=N4pfCVmSeq4L4tS8QbrFVsX6f6q844eft8xSuXdxU48%3D): #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16; #parameters: 222M
    - [`BEiT3-large`](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/pretraining/beit3_large_patch16_224.pth?sv=2021-10-04&st=2023-06-08T11%3A16%3A02Z&se=2033-06-09T11%3A16%3A00Z&sr=c&sp=r&sig=N4pfCVmSeq4L4tS8QbrFVsX6f6q844eft8xSuXdxU48%3D): #layer=24; hidden=1024; FFN factor=4x; #head=16; patch=16x16; #parameters: 674M
 
-
-### Text Tokenizer
+### Download Text Tokenizer
 
 [beit3.spm](https://conversationhub.blob.core.windows.net/beit-share-public/beit3/sentencepiece/beit3.spm) is the sentencepiece model used for tokenizing texts.
 ```
 from transformers import XLMRobertaTokenizer
 tokenizer = XLMRobertaTokenizer("/your_beit3_model_path/beit3.spm")
+
 ```
 
-## Setup
+### Set up the environment
 
 ```
 alias=`whoami | cut -d'.' -f2`; docker run -it --rm --runtime=nvidia --ipc=host --privileged -v /home/${alias}:/home/${alias} pytorch/pytorch:1.8.1-cuda11.1-cudnn8-devel bash
@@ -28,6 +32,10 @@ install required packages:
 ```
 pip install -r requirements.txt
 ```
+
+### (Optional) Download our fine-tuned checkpoint
+
+Will be released very soon
 
 
 ## Object Identification
@@ -69,14 +77,14 @@ If you find this repository useful, please consider citing our work:
 }
 ```
 
-## Todo
-- Fine-tuned checkpoints will be released after the accecptence of this paper.
+<!-- ## Todo
+- . -->
 
 
 
 ## Acknowledgement
 
-This repository is built using the [BEiT](https://github.com/microsoft/unilm/tree/master/beit), the [BEiTv2](https://github.com/microsoft/unilm/tree/master/beit2), the [CLIP](https://github.com/openai/CLIP), the [open_clip](https://github.com/mlfoundations/open_clip), the [Oscar](https://github.com/microsoft/Oscar), the [DeiT](https://github.com/facebookresearch/deit), the [Dino](https://github.com/facebookresearch/dino) repository and the [timm](https://github.com/rwightman/pytorch-image-models) library.
+This repository is built using the [BEiT](https://github.com/microsoft/unilm/tree/master/beit), the [BEiTv2](https://github.com/microsoft/unilm/tree/master/beit2), the [BEiTv3](https://github.com/microsoft/unilm/tree/master/beit3), the [CLIP](https://github.com/openai/CLIP), the [open_clip](https://github.com/mlfoundations/open_clip), the [Oscar](https://github.com/microsoft/Oscar), the [DeiT](https://github.com/facebookresearch/deit), the [Dino](https://github.com/facebookresearch/dino) repository and the [timm](https://github.com/rwightman/pytorch-image-models) library.
 
 
 ## License
