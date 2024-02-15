@@ -4,6 +4,7 @@ Official PyTorch implementation and pretrained models for paper:   "[RoboLLM: Ro
 
 ## Updates
 - [2024/01/31] Accepted to ICRA 2024!
+- [2024/02/15] Updated fine-tuned checkpoints for the identification and defection detection tasks.
 
 ## Setup
 
@@ -39,14 +40,25 @@ pip install -r requirements.txt
 Download this file and put them into the armbench dataset dir.
 [json_files.zip](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/EdUm-c9sJwpPp4Ir-ve7xjoBVBdGtXuyy4S3nz9RJHbFkA?e=3mL2U0)
 
+Additional json files for 3to1 task.
+[ID_json_3t1.zip]()
 <!-- #### For the Armbench identification task -->
 
 
 
 
-### (Optional) Download our fine-tuned checkpoint
+### (Optional) Download our fine-tuned checkpoints
 
-Will be released very soon
+#### For the Armbench identification task
+[RoboLLM Base whole gallary](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/EdMk_of-cipEhngncnskodYBQTTmQ2q_eiENc5rx95q1tA?e=jOzm12)
+
+[RoboLLM Base within basket](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/EZMjZt--T4JLv6LJtAJKYZABFDWj2oOyzxLqDe-y2rS_VQ?e=EX1CeV)
+
+
+#### For the Armbench defection detection task
+[RoboLLM Base](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/EWkqfuv_35FPlRlL9ztEKTYB9kmjsdncDHo9DwLrUkoOiQ?e=w8I70c)
+
+[RoboLLM Large](https://gla-my.sharepoint.com/:u:/g/personal/z_long_2_research_gla_ac_uk/ESQKOIKn2RhHhT39_aufJRwB5osYBvHhYshGICHPlu7r_A?e=ksQDa1)
 
 
 ## Object Identification
